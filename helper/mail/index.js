@@ -23,15 +23,15 @@ module.exports = {
     // }
 
     const newtransporter = nodemailer.createTransport({
-      host:"<host>",
-      port: 587,
+      host: process.env.EMAIL_HOST,
+      port: process.env.EMAIL_PORT,
       secure: false,
       secureConnection: true,
       connectionTimeout: 10000,
       requireTLS: false,
       auth: {
-        user: "<user>",
-        pass: "<pass>",
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       },
     });
     var mailOptions = {
@@ -39,7 +39,7 @@ module.exports = {
         name: 'Tablon',
         address: "100rabh68@gmail.com",
       },
-      to: "ramesh482005@gmail.com",
+      to: toEmail,
       subject: subject,
       bcc: [],
     };
