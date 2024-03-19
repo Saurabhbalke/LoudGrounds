@@ -23,6 +23,7 @@ module.exports = {
     // }
 
     const newtransporter = nodemailer.createTransport({
+      service: 'gmail',
       host: process.env.EMAIL_HOST,
       port: process.env.EMAIL_PORT,
       secure: false,
@@ -36,8 +37,8 @@ module.exports = {
     });
     var mailOptions = {
       from: {
-        name: 'Tablon',
-        address: "100rabh68@gmail.com",
+        name: 'Loudgrounds',
+        address: "noreplyloudgrounds@gmail.com",
       },
       to: toEmail,
       subject: subject,
