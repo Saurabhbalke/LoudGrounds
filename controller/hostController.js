@@ -1,12 +1,41 @@
 const { sendMail } = require("../helper/mail");
 const { getNextSequence } = require("../models/counter");
 const webHost = require("../models/host");
+const {getGoogleSheetClient, writeGoogleSheet, readGoogleSheet} = require("../helper/googleSheet")
 
-// To Create a Task
+const sheetId = process.env.SHEET_ID
+const tabName = 'Host' //by default Sheet1
+const range = 'A:N'  
+
+// To Create a host
 exports.addHost = async (req, res, next) => {
     let host = new webHost(req.body);
+    // auto increment user_id
     const user_id = await getNextSequence("host_counter");
     host.user_id = user_id;
+
+    // inserting data in googlesheet, change tabName and range as per requirement 
+    const googleSheetClient = await getGoogleSheetClient();
+    const support_needed = host.support_needed.toString();
+    const dataToBeInserted = [
+        [   
+            host.time_stamp, 
+            host.IP_address, 
+            host.user_id, 
+            host.event_type, 
+            host.preferred_date, 
+            host.preferred_venue, 
+            host.ticketed_event, 
+            host.guest_count, 
+            host.total_budget, 
+            support_needed, 
+            host.name, 
+            host.email_id, 
+            host.phone_number, 
+            host.notes
+        ],
+     ]
+     await writeGoogleSheet(googleSheetClient, sheetId, tabName, range, dataToBeInserted);
     
 
     const text = `Dear ${host.name},
@@ -35,7 +64,6 @@ exports.addHost = async (req, res, next) => {
         .then(
             async addedHost => {
                 const messageId = await sendMail("New Request for Hosting with Loudgrounds ", text, "host@loudgrounds.com", [], false);
-                console.log(messageId)
                 res.status(201).json({
                     'status': 'Success',
                     'message': 'host added SuccessFully!',

@@ -2,12 +2,39 @@ const { getNextSequence } = require("../models/counter");
 const webProvider = require("../models/provider");
 
 const { sendMail } = require("../helper/mail");
+const {getGoogleSheetClient, writeGoogleSheet, readGoogleSheet} = require("../helper/googleSheet")
 
-// To Create a Task
+const sheetId = process.env.SHEET_ID
+const tabName = 'Provider'  //by default Sheet1
+const range = 'A:N'
+
+// To Create a provider
 exports.addProvider = async (req, res, next) => {
     let  provider = new webProvider(req.body);
     const user_id = await getNextSequence("provider_counter");
     provider.user_id = user_id
+
+    const googleSheetClient = await getGoogleSheetClient();
+    const dataToBeInserted = [
+        [   
+            provider.time_stamp, 
+            provider.IP_address, 
+            provider.user_id, 
+            provider.organizer_type, 
+            provider.business_type, 
+            provider.comp_name, 
+            provider.website, 
+            provider.instagram, 
+            provider.service_details, 
+            provider.standard_packages, 
+            provider.name, 
+            provider.email_id, 
+            provider.phone_number, 
+            provider.designation
+        ]
+    ]
+    await writeGoogleSheet(googleSheetClient, sheetId, tabName, range, dataToBeInserted);
+    
     const text = `Dear ${provider.name},
 
     Thank you for showing interest in being part of the Loudgrounds community and organizing amazing events together.
@@ -34,7 +61,6 @@ exports.addProvider = async (req, res, next) => {
         .then(
             async addedProvider => {
                 const messageId = await sendMail("New Request for Partnering with Loudgrounds", text, "partner@loudgrounds.com", [], false);
-                console.log(messageId)
                 
                 res.status(201).json({
                     'status': 'Success',
