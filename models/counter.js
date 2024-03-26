@@ -11,4 +11,4 @@ exports.getNextSequence = async (name) => {
     const data = await counter.findOneAndUpdate({ key: name }, { $inc: { seq: 1 } }, { upsert: true, returnDocument: 'after' });
     
     return data.seq;
- }
+}
